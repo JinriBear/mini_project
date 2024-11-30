@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  
+  <style>
+    *{
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 50px;
+      height: 50px;
+      background-color: #4d4d4c;
+      border: none;
+      border-radius: 50px;
+    
+      font-size: 24px;
+      color: #fff;
+    }
+
+    button:active {
+      background-color: #767575;
+    }
+
+    .container {
+      width: 250px;
+      padding: 10px;
+      padding-top: 30px;
+      background-color: #242423;
+      border-radius: 24px;
+    }
+
+    #display {
+      width: 100%;
+      height: 36px;
+      
+      text-align: end;
+      font-size: 36px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .btn-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .operator {
+      background-color: #f7901d;
+    }
+
+    .operator:active {
+      background-color: #f7c285;
+    }
+
+    .equals {
+      background-color: #f7901d;
+    }
+
+    .equals:active {
+      background-color: #f7c285;
+    }
+  </style>
+
+</head>
+<body>
+  <h1>계산기</h1>
+  <div class="container">
+    <div id="display">0</div>
+    <div class="btn-container">
+      <button class="clear">CE</button>
+      <button class="clear">AC</button>
+      <button></button>
+      <button class="operator">÷</button>
+      <button class="number">7</button>
+      <button class="number">8</button>
+      <button class="number">9</button>
+      <button class="operator">x</button>
+      <button class="number">4</button>
+      <button class="number">5</button>
+      <button class="number">6</button>
+      <button class="operator">−</button>
+      <button class="number">1</button>
+      <button class="number">2</button>
+      <button class="number">3</button>
+      <button class="operator">+</button>
+      <button></button>
+      <button class="number">0</button>
+      <button class="dot">.</button>
+      <button class="equals">=</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.querySelector('#display');
+    const btn = document.querySelectorAll('button');
+    const clearBtn = document.querySelector('.clear');
+    const btnContainer = document.querySelector('.btn-container');
+
+    const calc = {
+      currentEntry: "",
+      displayArray: [],
+      index: 0,
+      getBtnInfo: function(btn) {
+        return btn.classList[0];
+      },
+      updateEntry: function(value){
+        this.currentEntry = value;
+        this.displayArray[this.index] = value;
+      },
+      updateValue: function(btn) {
+        const value = btn.innerText;
+        const btnType = this.getBtnInfo(btn);
+
+        const btnHandlers = {
+          number: () => {
+            if(isNaN(this.currentEntry)){
+              this.index++;
+              this.updateEntry(value);
+            } else {
+              this.updateEntry(this.currentEntry + value);
+            }
+          },
+          dot: () => {
+            if(this.currentEntry.includes(".") || this.currentEntry.length === 0 || isNaN(this.currentEntry))
+              return;
+
+            this.updateEntry(this.currentEntry + value);  
+          },
+          operator: () => {
+            if(this.currentEntry.length === 0 || this.currentEntry[this.currentEntry.length-1] === ".")
+              return;
+
+            if(isNaN(this.currentEntry)){
+              this.updateEntry(value);
+            } else {
+              this.index++;
+              this.updateEntry(value);
+            }
+          },
+          clear: () => {
+            if(this.displayArray.length === 0)
+              return;
+
+            if(btn.innerText === "AC"){
+              this.index = 0;
+              this.currentEntry = "";
+              this.displayArray = [];
+              return;
+            }
+            
+            if(isNaN(this.currentEntry) && this.currentEntry !== ""){
+              this.index--;
+              this.currentEntry = this.displayArray[this.index];
+              this.displayArray.pop();
+            } else {
+              this.currentEntry = this.currentEntry.slice(0, -1);
+              this.displayArray[this.index] = this.currentEntry;
+              
+              if(this.currentEntry === ""){
+                if(this.index === 0){
+                  return;
+                }
+                this.index--;
+                this.displayArray.pop();
+                this.currentEntry = this.displayArray[this.index];
+              }
+            }
+          },
+          equals: () => {
+            if(this.displayArray.length <= 2 || this.currentEntry[this.currentEntry.length-1] === '.' || isNaN(this.displayArray[this.displayArray.length -1]))
+              return;
+
+            this.polishCalc(this.displayArray);
+          }
+        }
+
+        btnHandlers[btnType]();
+      },
+      updateDisplay: function(display) {
+        display.innerText = "";
+        if(this.displayArray.length === 0 || this.displayArray[0] === "")
+          display.innerText = 0;
+        else
+          this.displayArray.forEach(function(element){
+            display.innerText += element;
+          })
+        
+        console.log(this.displayArray);
+      },
+      polishCalc: function(arr) {
+        const operators = {
+          "+":function(a, b){return a + b},
+          "−":function(a, b){return a - b},
+          "x":function(a, b){return a * b},
+          "÷":function(a, b){return a / b},
+        }
+
+        const calc = function(arr, op1, op2) {
+          for(let i=0; i<arr.length; i++)
+            if(arr[i] === op1 || arr[i] === op2){
+              const operator = arr[i];
+              const result = operators[operator](Number(arr[i-1]), Number(arr[i+1]));
+              arr.splice(i-1, 3, result.toString());
+              i--;
+            }
+        }
+
+        calc(arr, "x", "÷");
+        calc(arr, "+", "−");
+
+        this.index = 0;
+        this.currentEntry = arr[0];
+        this.displayArray = arr;
+      }
+    };
+    
+    btnContainer.addEventListener('click', function(e){
+      if(e.target.tagName !== "BUTTON")
+        return;
+      
+      const btn = e.target;
+      calc.updateValue(btn)
+      calc.updateDisplay(display);
+    });
+  </script>
+</body>
+</html>
