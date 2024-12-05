@@ -74,7 +74,7 @@
 - **사칙연산 우선순위** <br>
     ![사칙연산 우선순위 예시](https://github.com/user-attachments/assets/bddee7d0-529a-4fdb-9871-194f84b6bf98)
     <br><br>
-- **부분삭제(CE), 전체삭제(AC), 예외처리**
+- **부분삭제(CE), 전체삭제(AC), 예외처리** <br>
     ![부분삭제, 전체삭제, 예외처리 예시](https://github.com/user-attachments/assets/fb17fbfd-2b94-4952-9a83-29cd6e3db674)
     <br><br>
 
